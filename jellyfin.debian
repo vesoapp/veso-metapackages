@@ -6,8 +6,8 @@ Standards-Version: 3.9.2
 
 Package: jellyfin
 Version: X.Y.Z
-Maintainer: Jellyfin Packaging Team <packaging@jellyfin.org>
-Depends: jellyfin-server (>= X.Y.Z), jellyfin-web (>= X.Y.Z), jellyfin-ffmpeg5 (>= 5.0.0)
-Description: Provides the Jellyfin Free Software Media System
- Provides the full Jellyfin experience, including both the server and web interface.
+Maintainer: Veso Packaging Team <packaging@jellyfin.org>
+Depends: veso-server (>= X.Y.Z), veso-web (>= X.Y.Z), veso-ffmpeg5 (>= 5.0.0)
+Description: Provides the Veso Free Software Media System
+ Provides the full Veso experience, including both the server and web interface.
 

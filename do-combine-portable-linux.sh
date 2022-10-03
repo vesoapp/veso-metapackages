@@ -6,7 +6,7 @@ version="${1}"
 
 # Static variables
 repo_dir="/srv/jellyfin"
-metapackages_dir="${repo_dir}/projects/server/jellyfin-metapackages"
+metapackages_dir="${repo_dir}/projects/server/veso-metapackages"
 plugins_dir="${repo_dir}/projects/plugin/"
 linux_static_arches=(
     "amd64"
@@ -57,7 +57,7 @@ do_combine_portable_linux() {
     for arch in ${linux_static_arches[@]}; do
         case ${servertype} in
             server)
-                server_archive="$( find ${filedir}/${releasedir}/${version} -type f -name "jellyfin-${servertype}*${arch}.${filetype}" | head -1 )"
+                server_archive="$( find ${filedir}/${releasedir}/${version} -type f -name "veso-${servertype}*${arch}.${filetype}" | head -1 )"
                 if [[ -z ${is_unstable} ]]; then
                     web_archive="$( find ${filedir}/${partnerreleasedir} -type f -name "*${version}*.${filetype}" -printf "%T@ %Tc %p\n" | sort -rn | head -1 | awk '{ print $NF }' )"
                 else
@@ -68,7 +68,7 @@ do_combine_portable_linux() {
                 fi
             ;;
             web)
-                web_archive="$( find ${filedir}/${releasedir}/${version} -type f -name "jellyfin-${servertype}*.${filetype}" | head -1 )"
+                web_archive="$( find ${filedir}/${releasedir}/${version} -type f -name "veso-${servertype}*.${filetype}" | head -1 )"
                 if [[ -z ${is_unstable} ]]; then
                     server_archive="$( find ${filedir}/${partnerreleasedir} -type f -name "*${version}*${arch}.${filetype}" -printf "%T@ %Tc %p\n" | sort -rn | head -1 | awk '{ print $NF }' )"
                 else
@@ -87,7 +87,7 @@ do_combine_portable_linux() {
 
         echo "Correcting root directory naming"
         pushd ${tempdir} 1>&2
-        server_dir="$( find . -maxdepth 1 -type d -name "jellyfin-server_*" | head -1 )"
+        server_dir="$( find . -maxdepth 1 -type d -name "veso-server_*" | head -1 )"
         mv ${server_dir} ./jellyfin_${version}
         popd 1>&2
 
@@ -96,8 +96,8 @@ do_combine_portable_linux() {
 
         echo "Correcting web directory naming"
         pushd ${tempdir}/jellyfin_${version}/ 1>&2
-        web_dir="$( find . -maxdepth 1 -type d -name "jellyfin-web_*" | head -1 )"
-        mv ${web_dir} jellyfin-web
+        web_dir="$( find . -maxdepth 1 -type d -name "veso-web_*" | head -1 )"
+        mv ${web_dir} veso-web
         popd 1>&2
 
         echo "Creating combined tar archive"

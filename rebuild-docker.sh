@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-# Jellyfin Azure builds collection script
+# Veso Azure builds collection script
 # Parses the artifacts uploaded from an Azure build and puts them into place, as well as building the various metapackages, metaarchives, and Docker metaimages.
 
 logfile="/var/log/build/collect-server.log"
@@ -54,7 +54,7 @@ set -o xtrace
 # Ensure Metapackages repo is cloned and up-to-date
 echo "Ensuring metapackages repo is up to date"
 pushd ${repo_dir} 1>&2
-./build.py --clone-only jellyfin-metapackages 1>&2
+./build.py --clone-only veso-metapackages 1>&2
 popd 1>&2
 pushd ${metapackages_dir} 1>&2
 git checkout master 1>&2
@@ -76,9 +76,9 @@ do_docker_meta() {
         server_ok=""
         web_ok=""
         for arch in ${docker_arches[@]}; do
-            curl --silent -f -lSL https://index.docker.io/v1/repositories/jellyfin/jellyfin-server/tags/${version}-${arch} >/dev/null && server_ok="${server_ok}y"
+            curl --silent -f -lSL https://index.docker.io/v1/repositories/vesoapp/veso-server/tags/${version}-${arch} >/dev/null && server_ok="${server_ok}y"
         done
-        curl --silent -f -lSL https://index.docker.io/v1/repositories/jellyfin/jellyfin-web/tags/${version} >/dev/null && web_ok="y"
+        curl --silent -f -lSL https://index.docker.io/v1/repositories/vesoapp/veso-web/tags/${version} >/dev/null && web_ok="y"
         if [[ ${server_ok} != "yyy" || ${web_ok} != "y" ]]; then
             return
         fi
@@ -90,7 +90,7 @@ do_docker_meta() {
 
     echo "Building combined Docker images"
 
-    docker_image="jellyfin/jellyfin"
+    docker_image="vesoapp/veso"
 
     docker login 1>&2
 

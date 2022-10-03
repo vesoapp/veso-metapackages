@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-# Jellyfin Azure builds collection script
+# Veso Azure builds collection script
 # Parses the artifacts uploaded from an Azure build and puts them into place, as well as building the various metapackages, metaarchives, and Docker metaimages.
 
 #logfile="/var/log/build/collect-server.log"
@@ -31,7 +31,7 @@ time_start=$( date +%s )
 
 # Static variables
 repo_dir="/srv/jellyfin"
-metapackages_dir="${repo_dir}/projects/server/jellyfin-metapackages"
+metapackages_dir="${repo_dir}/projects/server/veso-metapackages"
 plugins_dir="${repo_dir}/projects/plugin/"
 linux_static_arches=(
     "amd64"
@@ -66,8 +66,8 @@ pushd ${metapackages_dir}
 git pull --rebase || exit 1
 popd
 
-examplefile="$( find ${indir}/${build_id} -type f \( -name "jellyfin-*.deb" -o -name "jellyfin_*.exe" \) | head -1 )"
-servertype="$( grep -E -o 'jellyfin-(server|web)_' <<<"${examplefile}" | sed 's/jellyfin-//g; s/_//g' )"
+examplefile="$( find ${indir}/${build_id} -type f \( -name "veso-*.deb" -o -name "jellyfin_*.exe" \) | head -1 )"
+servertype="$( grep -E -o 'veso-(server|web)_' <<<"${examplefile}" | sed 's/veso-//g; s/_//g' )"
 echo "Servertype: ${servertype}"
 
 # Static files collection function
@@ -135,15 +135,15 @@ do_combine_portable_linux() {
     for arch in ${linux_static_arches[@]}; do
         case ${servertype} in
             server)
-                server_archive="$( find ${filedir}/${releasedir}/${version} -type f -name "jellyfin-server*-${arch}.${filetype}" | head -1 )"
-                web_archive="$( find ${filedir}/${partnerreleasedir} -type f -name "jellyfin-web*.${filetype}" -printf "%T@ %Tc %p\n" | sort -rn | head -1 | awk '{ print $NF }' )"
+                server_archive="$( find ${filedir}/${releasedir}/${version} -type f -name "veso-server*-${arch}.${filetype}" | head -1 )"
+                web_archive="$( find ${filedir}/${partnerreleasedir} -type f -name "veso-web*.${filetype}" -printf "%T@ %Tc %p\n" | sort -rn | head -1 | awk '{ print $NF }' )"
                 if [[ ! -f ${web_archive} ]]; then
                     continue
                 fi
             ;;
             web)
-                server_archive="$( find ${filedir}/${partnerreleasedir}/${version} -type f -name "jellyfin-server*-${arch}.${filetype}" | head -1 )"
-                web_archive="$( find ${filedir}/${releasedir} -type f -name "jellyfin-web*.${filetype}" -printf "%T@ %Tc %p\n" | sort -rn | head -1 | awk '{ print $NF }' )"
+                server_archive="$( find ${filedir}/${partnerreleasedir}/${version} -type f -name "veso-server*-${arch}.${filetype}" | head -1 )"
+                web_archive="$( find ${filedir}/${releasedir} -type f -name "veso-web*.${filetype}" -printf "%T@ %Tc %p\n" | sort -rn | head -1 | awk '{ print $NF }' )"
                 if [[ ! -f ${server_archive} ]]; then
                     continue
                 fi
@@ -157,7 +157,7 @@ do_combine_portable_linux() {
 
         echo "Correcting root directory naming"
         pushd ${tempdir} 1>&2
-        server_dir="$( find . -maxdepth 1 -type d -name "jellyfin-server_*" | head -1 )"
+        server_dir="$( find . -maxdepth 1 -type d -name "veso-server_*" | head -1 )"
         mv ${server_dir} ./jellyfin_${version}
         popd 1>&2
 
@@ -166,8 +166,8 @@ do_combine_portable_linux() {
 
         echo "Correcting web directory naming"
         pushd ${tempdir}/jellyfin_${version}/ 1>&2
-        web_dir="$( find . -maxdepth 1 -type d -name "jellyfin-web_*" | head -1 )"
-        mv ${web_dir} jellyfin-web
+        web_dir="$( find . -maxdepth 1 -type d -name "veso-web_*" | head -1 )"
+        mv ${web_dir} veso-web
         popd 1>&2
 
         echo "Creating combined tar archive"
@@ -216,8 +216,8 @@ do_combine_portable() {
     partnerreleasedir="versions/${stability}/${partnertype}"
     linkdir="${stability}/${version}/combined"
 
-    our_archive="$( find ${filedir}/${releasedir}/${version} -type f -name "jellyfin-${servertype}*.${filetype}" | head -1 )"
-    partner_archive="$( find ${filedir}/${partnerreleasedir}/${version} -type f -name "jellyfin-*.${filetype}" -printf "%T@ %Tc %p\n" | sort -rn | head -1 | awk '{ print $NF }' )"
+    our_archive="$( find ${filedir}/${releasedir}/${version} -type f -name "veso-${servertype}*.${filetype}" | head -1 )"
+    partner_archive="$( find ${filedir}/${partnerreleasedir}/${version} -type f -name "veso-*.${filetype}" -printf "%T@ %Tc %p\n" | sort -rn | head -1 | awk '{ print $NF }' )"
 
     if [[ ! -f ${partner_archive} ]]; then
         return
@@ -244,7 +244,7 @@ do_combine_portable() {
 
     echo "Correcting root directory naming"
     pushd ${tempdir} 1>&2
-    server_dir="$( find . -maxdepth 1 -type d -name "jellyfin-server_*" | head -1 )"
+    server_dir="$( find . -maxdepth 1 -type d -name "veso-server_*" | head -1 )"
     mv ${server_dir} ./jellyfin_${version}
     popd 1>&2
 
@@ -257,8 +257,8 @@ do_combine_portable() {
 
     echo "Correcting web directory naming"
     pushd ${tempdir}/jellyfin_${version}/ 1>&2
-    web_dir="$( find . -maxdepth 1 -type d -name "jellyfin-web_*" | head -1 )"
-    mv ${web_dir} jellyfin-web
+    web_dir="$( find . -maxdepth 1 -type d -name "veso-web_*" | head -1 )"
+    mv ${web_dir} veso-web
     popd 1>&2
 
     pushd ${tempdir} 1>&2
@@ -363,16 +363,16 @@ do_docker_meta() {
         server_ok=""
         web_ok=""
         for arch in ${docker_arches[@]}; do
-            curl --silent -f -lSL https://index.docker.io/v1/repositories/jellyfin/jellyfin-server/tags/${version}-${arch} >/dev/null && server_ok="${server_ok}y"
+            curl --silent -f -lSL https://index.docker.io/v1/repositories/vesoapp/veso-server/tags/${version}-${arch} >/dev/null && server_ok="${server_ok}y"
         done
-        curl --silent -f -lSL https://index.docker.io/v1/repositories/jellyfin/jellyfin-web/tags/${version} >/dev/null && web_ok="y"
+        curl --silent -f -lSL https://index.docker.io/v1/repositories/vesoapp/veso-web/tags/${version} >/dev/null && web_ok="y"
         if [[ ${server_ok} != "yyy" || ${web_ok} != "y" ]]; then
             return
         fi
     fi
 
     # We're in a stable or rc build, and this image already exists, so abort
-    if curl --silent -f -lSL https://index.docker.io/v1/repositories/jellyfin/jellyfin/tags/${version} >/dev/null; then
+    if curl --silent -f -lSL https://index.docker.io/v1/repositories/vesoapp/veso/tags/${version} >/dev/null; then
         return
     fi
 
@@ -381,7 +381,7 @@ do_docker_meta() {
 
     echo "Building combined Docker images"
 
-    docker_image="jellyfin/jellyfin"
+    docker_image="vesoapp/veso"
 
     docker login 1>&2
 
@@ -539,17 +539,17 @@ if [[ -f ${indir}/${build_id}/openapi.json ]]; then
 
     api_dir="${api_root}/stable-pre"
     api_version="${version}"
-    link_name="jellyfin-openapi-stable-pre"
+    link_name="veso-openapi-stable-pre"
 
     mkdir -p ${api_dir}
     if ! diff -q ${indir}/${build_id}/openapi.json ${api_root}/${link_name}.json &>/dev/null; then
         # Only replace the OpenAPI spec if they differ
-        cp ${indir}/${build_id}/openapi.json ${api_dir}/jellyfin-openapi-${api_version}.json
+        cp ${indir}/${build_id}/openapi.json ${api_dir}/veso-openapi-${api_version}.json
         if [[ -L ${api_root}/${link_name}.json ]]; then
             rm -f ${api_root}/${link_name}_previous.json
             cp ${api_root}/${link_name}.json ${api_root}/${link_name}_previous.json
         fi
-        ln -s ${api_dir}/jellyfin-openapi-${api_version}.json ${api_root}/${link_name}.json
+        ln -s ${api_dir}/veso-openapi-${api_version}.json ${api_root}/${link_name}.json
     fi
 fi
 

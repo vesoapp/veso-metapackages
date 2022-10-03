@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-# Jellyfin Azure builds collection script
+# Veso Azure builds collection script
 # Parses the artifacts uploaded from an Azure build and puts them into place, as well as building the various metapackages, metaarchives, and Docker metaimages.
 
 logfile="/var/log/build/collect-server.log"
@@ -44,7 +44,7 @@ time_start=$( date +%s )
 
 # Static variables
 repo_dir="/srv/jellyfin"
-metapackages_dir="${repo_dir}/projects/server/jellyfin-metapackages"
+metapackages_dir="${repo_dir}/projects/server/veso-metapackages"
 plugins_dir="${repo_dir}/projects/plugin/"
 linux_static_arches=(
     "amd64"
@@ -67,7 +67,7 @@ echo "**********" 1>&2
 set -o xtrace
 
 # These rely on the naming format jellyin-{type}[-_]{ver}[-_]junk
-examplefile="$( find ${indir}/${build_id} -type f \( -name "jellyfin-*.deb" -o -name "jellyfin_*.exe" \) | head -1 )"
+examplefile="$( find ${indir}/${build_id} -type f \( -name "veso-*.deb" -o -name "jellyfin_*.exe" \) | head -1 )"
 servertype="$( awk -F '[_-]' '{ print $2 }' <<<"${examplefile}" )"
 version="$( awk -F'[_-]' '{ print $3 }' <<<"${examplefile}" )"
 
@@ -86,7 +86,7 @@ fi
 # Ensure Metapackages repo is cloned and up-to-date
 echo "Ensuring metapackages repo is up to date"
 pushd ${repo_dir} 1>&2
-./build.py --clone-only jellyfin-metapackages 1>&2
+./build.py --clone-only veso-metapackages 1>&2
 popd 1>&2
 pushd ${metapackages_dir} 1>&2
 git checkout master 1>&2
@@ -216,7 +216,7 @@ do_combine_portable_linux() {
     for arch in ${linux_static_arches[@]}; do
         case ${servertype} in
             server)
-                server_archive="$( find ${filedir}/${releasedir}/${version} -type f -name "jellyfin-${servertype}*${arch}.${filetype}" | head -1 )"
+                server_archive="$( find ${filedir}/${releasedir}/${version} -type f -name "veso-${servertype}*${arch}.${filetype}" | head -1 )"
                 if [[ -z ${is_unstable} ]]; then
                     web_archive="$( find ${filedir}/${partnerreleasedir} -type f -name "*${version}*.${filetype}" -printf "%T@ %Tc %p\n" | sort -rn | head -1 | awk '{ print $NF }' )"
                 else
@@ -227,7 +227,7 @@ do_combine_portable_linux() {
                 fi
             ;;
             web)
-                web_archive="$( find ${filedir}/${releasedir}/${version} -type f -name "jellyfin-${servertype}*.${filetype}" | head -1 )"
+                web_archive="$( find ${filedir}/${releasedir}/${version} -type f -name "veso-${servertype}*.${filetype}" | head -1 )"
                 if [[ -z ${is_unstable} ]]; then
                     server_archive="$( find ${filedir}/${partnerreleasedir} -type f -name "*${version}*${arch}.${filetype}" -printf "%T@ %Tc %p\n" | sort -rn | head -1 | awk '{ print $NF }' )"
                 else
@@ -246,7 +246,7 @@ do_combine_portable_linux() {
 
         echo "Correcting root directory naming"
         pushd ${tempdir} 1>&2
-        server_dir="$( find . -maxdepth 1 -type d -name "jellyfin-server_*" | head -1 )"
+        server_dir="$( find . -maxdepth 1 -type d -name "veso-server_*" | head -1 )"
         mv ${server_dir} ./jellyfin_${version}
         popd 1>&2
 
@@ -255,8 +255,8 @@ do_combine_portable_linux() {
 
         echo "Correcting web directory naming"
         pushd ${tempdir}/jellyfin_${version}/ 1>&2
-        web_dir="$( find . -maxdepth 1 -type d -name "jellyfin-web_*" | head -1 )"
-        mv ${web_dir} jellyfin-web
+        web_dir="$( find . -maxdepth 1 -type d -name "veso-web_*" | head -1 )"
+        mv ${web_dir} veso-web
         popd 1>&2
 
         echo "Creating combined tar archive"
@@ -313,7 +313,7 @@ do_combine_portable() {
     partnerreleasedir="versions/${stability}/${partnertype}"
     linkdir="${stability}/combined"
 
-    our_archive="$( find ${filedir}/${releasedir}/${version} -type f -name "jellyfin-${servertype}*.${filetype}" | head -1 )"
+    our_archive="$( find ${filedir}/${releasedir}/${version} -type f -name "veso-${servertype}*.${filetype}" | head -1 )"
     if [[ -z ${is_unstable} ]]; then
         partner_archive="$( find ${filedir}/${partnerreleasedir} -type f -name "*${version}*.${filetype}" -printf "%T@ %Tc %p\n" | sort -rn | head -1 | awk '{ print $NF }' )"
     else
@@ -345,7 +345,7 @@ do_combine_portable() {
 
     echo "Correcting root directory naming"
     pushd ${tempdir} 1>&2
-    server_dir="$( find . -maxdepth 1 -type d -name "jellyfin-server_*" | head -1 )"
+    server_dir="$( find . -maxdepth 1 -type d -name "veso-server_*" | head -1 )"
     mv ${server_dir} ./jellyfin_${version}
     popd 1>&2
 
@@ -358,8 +358,8 @@ do_combine_portable() {
 
     echo "Correcting web directory naming"
     pushd ${tempdir}/jellyfin_${version}/ 1>&2
-    web_dir="$( find . -maxdepth 1 -type d -name "jellyfin-web_*" | head -1 )"
-    mv ${web_dir} jellyfin-web
+    web_dir="$( find . -maxdepth 1 -type d -name "veso-web_*" | head -1 )"
+    mv ${web_dir} veso-web
     popd 1>&2
 
     pushd ${tempdir} 1>&2
@@ -424,9 +424,9 @@ do_deb_meta() {
     if [[ -z ${is_unstable} && -n ${is_rc} ]]; then
         # Check if we're the first one done and abandon this if so (let the last build trigger the metapackage)
         if [[ 
-            $( reprepro -b /srv/repository/${platform} -C main list ${codename} jellyfin-web | awk '{ print $NF }' | sort | uniq | grep -F "${version}" | wc -l ) -lt 1
+            $( reprepro -b /srv/repository/${platform} -C main list ${codename} veso-web | awk '{ print $NF }' | sort | uniq | grep -F "${version}" | wc -l ) -lt 1
             &&
-            $( reprepro -b /srv/repository/${platform} -C main list ${codename} jellyfin-server | awk '{ print $NF }' | sort | uniq | grep -F "${version}" | wc -l ) -lt 1
+            $( reprepro -b /srv/repository/${platform} -C main list ${codename} veso-server | awk '{ print $NF }' | sort | uniq | grep -F "${version}" | wc -l ) -lt 1
         ]]; then
             return
         fi
@@ -434,7 +434,7 @@ do_deb_meta() {
         # For stable releases, fix our dependency to the version
         server_checkstring="(>=${version}-0)"
         web_checkstring="(>=${version}-0)"
-        sed -i "s/Depends: jellyfin-server, jellyfin-web/Depends: jellyfin-server ${server_checkstring}, jellyfin-web ${web_checkstring}/g" jellyfin.debian
+        sed -i "s/Depends: veso-server, veso-web/Depends: veso-server ${server_checkstring}, veso-web ${web_checkstring}/g" jellyfin.debian
     fi
 
     # Check if there's already a metapackage (e.g. this is the second or later arch for this platform)
@@ -549,11 +549,11 @@ do_docker_meta() {
         server_ok=""
         web_ok=""
         for arch in ${docker_arches[@]}; do
-            if docker_tag_exists jellyfin/jellyfin-server ${version}-${arch}; then
+            if docker_tag_exists vesoapp/veso-server ${version}-${arch}; then
                 server_ok="${server_ok}y"
             fi
         done
-        if docker_tag_exists jellyfin/jellyfin-web ${version}; then
+        if docker_tag_exists vesoapp/veso-web ${version}; then
             web_ok="y"
         fi
         if [[ ${server_ok} != "yyy" || ${web_ok} != "y" ]]; then
@@ -562,7 +562,7 @@ do_docker_meta() {
     fi
 
     # We're in a stable or rc build, and this image already exists, so abort
-    if docker_tag_exists jellyfin/jellyfin ${version}; then
+    if docker_tag_exists vesoapp/veso ${version}; then
         return
     fi
 
@@ -571,7 +571,7 @@ do_docker_meta() {
 
     echo "Building combined Docker images"
 
-    docker_image="jellyfin/jellyfin"
+    docker_image="vesoapp/veso"
 
     docker login 1>&2
 
@@ -742,10 +742,10 @@ for directory in ${indir}/${build_id}/*; do
             # Trigger the installer build; this is done here due to convolutions doing it in the CI itself
             #if [[ -n ${is_unstable} ]]; then
             #    echo "Triggering pipeline build for Windows Installer (unstable)"
-            #    #az pipelines build queue --organization https://dev.azure.com/jellyfin-project --project jellyfin --definition-id 30 --branch master --variables Trigger="Unstable" 1>&2
+            #    #az pipelines build queue --organization https://dev.azure.com/veso-project --project jellyfin --definition-id 30 --branch master --variables Trigger="Unstable" 1>&2
             #else
             #    echo "Triggering pipeline build for Windows Installer (stable v${version})"
-            #    #az pipelines build queue --organization https://dev.azure.com/jellyfin-project --project jellyfin --definition-id 30 --branch master --variables Trigger="Stable" TagName="v${version}" 1>&2
+            #    #az pipelines build queue --organization https://dev.azure.com/veso-project --project jellyfin --definition-id 30 --branch master --variables Trigger="Stable" TagName="v${version}" 1>&2
             #fi
 
             do_files ${typename}
@@ -771,21 +771,21 @@ if [[ -f ${indir}/${build_id}/openapi.json ]]; then
     if [[ -z ${is_unstable} ]]; then
         api_dir="${api_root}/stable"
         api_version="${version}"
-        link_name="jellyfin-openapi-stable"
+        link_name="veso-openapi-stable"
     else
         api_dir="${api_root}/unstable"
         api_version="${build_id}"
-        link_name="jellyfin-openapi-unstable"
+        link_name="veso-openapi-unstable"
     fi
     mkdir -p ${api_dir}
     if ! diff -q ${indir}/${build_id}/openapi.json ${api_root}/${link_name}.json &>/dev/null; then
         # Only replace the OpenAPI spec if they differ
-        mv ${indir}/${build_id}/openapi.json ${api_dir}/jellyfin-openapi-${api_version}.json
+        mv ${indir}/${build_id}/openapi.json ${api_dir}/veso-openapi-${api_version}.json
         if [[ -L ${api_root}/${link_name}.json ]]; then
             rm -f ${api_root}/${link_name}_previous.json
             mv ${api_root}/${link_name}.json ${api_root}/${link_name}_previous.json
         fi
-        ln -s ${api_dir}/jellyfin-openapi-${api_version}.json ${api_root}/${link_name}.json
+        ln -s ${api_dir}/veso-openapi-${api_version}.json ${api_root}/${link_name}.json
     fi
 fi
 
@@ -801,7 +801,7 @@ mirrorbits refresh
 #if [[ -n ${is_unstable} ]]; then
 #    pushd ${repo_dir}
 #    export JELLYFIN_REPO="/srv/repository/releases/plugin/manifest-unstable.json"
-#    for plugin in ${plugins_dir}/jellyfin-plugin-*; do
+#    for plugin in ${plugins_dir}/veso-plugin-*; do
 #        /srv/jellyfin/build-plugin.sh ${plugin} unstable
 #        chown -R build:adm ${plugin}
 #    done
